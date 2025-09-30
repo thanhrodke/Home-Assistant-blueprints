@@ -1,4 +1,5 @@
-Home Assistant Blueprints
+# Home Assistant Blueprints
+
 A collection of reusable Home Assistant blueprints for automations, designed for efficiency and persistence. This repository houses blueprints to streamline smart home setups, starting with a persistent timer blueprint that survives Home Assistant reboots.
 Blueprints
 Persistent Timer for Automation
