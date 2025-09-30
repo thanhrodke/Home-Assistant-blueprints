@@ -1,0 +1,45 @@
+blueprint:
+  name: Persistent Timer for Automation
+  description: Makes any automation delay persist across reboots using input_datetime
+  domain: automation
+  input:
+    automation_alias:
+      name: Automation Alias
+      description: The alias of the automation for unique timer identification
+      selector:
+        text:
+    trigger_event:
+      name: Trigger
+      description: The trigger for the automation (e.g., tag scan, state change)
+      selector:
+        trigger:
+    delay_duration:
+      name: Delay Duration
+      description: Duration to delay before executing actions (e.g., 2h30m)
+      selector:
+        duration:
+    actions:
+      name: Actions
+      description: Actions to execute after the delay
+      selector:
+        action:
+variables:
+  automation_alias: !input automation_alias
+  timer_entity: "input_datetime.{{ automation_alias | slugify }}_timer"
+trigger: !input trigger_event
+condition: []
+action:
+  - service: input_datetime.set_datetime
+    data:
+      entity_id: "{{ timer_entity }}"
+      datetime: "{{ now() + (input_delay_duration | as_timedelta) }}"
+  - wait_template: "{{ now() >= states(timer_entity) | as_datetime }}"
+    timeout: "{{ input_delay_duration }}"
+  - choose:
+      - conditions: "{{ now() >= states(timer_entity) | as_datetime }}"
+        sequence: !input actions
+  - service: input_datetime.set_datetime
+    data:
+      entity_id: "{{ timer_entity }}"
+      datetime: "1970-01-01 00:00:00"  # Reset timer
+mode: single
